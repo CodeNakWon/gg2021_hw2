@@ -91,8 +91,8 @@ class MyGLRenderer(context: Context): GLSurfaceView.Renderer{
         //   for each texture construction.\
         // Also, change the teapot Obj construction code below to get the texture parameters.
 
-        val teapotTexture = Texture(mContext, 0, R.drawable.flower, "textureDiff")
-        val dissolveTexture = Texture(mContext, 0, R.drawable.dissolve, "textureDissolve")
+        // val teapotTexture =
+        // val dissolveTexture =
         // teapotMaterial =
         teapot = Obj(mContext, "teapot.obj", mProgram)
 
@@ -195,9 +195,6 @@ fun myFrustumM(aspect:Float, fov:Float, near:Float, far:Float):FloatArray{
 class Obj(context: Context, filename: String, program: Int, private var material: Material? = null){
 
     private var vertices = mutableListOf<Float>()
-    private var normals = mutableListOf<Float>()
-    private var texCoord = mutableListOf<Float>()
-    private var indices = mutableListOf<Int>()
     private var triangleVertices = mutableListOf<Float>()
     private lateinit var verticesBuffer: FloatBuffer
 
@@ -220,35 +217,34 @@ class Obj(context: Context, filename: String, program: Int, private var material
                         vertices.add(z)
                     }
                     line.startsWith("vn ") -> {
-                        val vNormal = line.split(" ")
-                        val x = vNormal[1].toFloat()
-                        val y = vNormal[2].toFloat()
-                        val z = vNormal[3].toFloat()
-                        normals.add(x)
-                        normals.add(y)
-                        normals.add(z)
+                        //-------------------------------------------------------
+                        // Problem 1
+                        // Implement .obj loader, parsing vertex (v), texture (vt), and normal (n).
+                        // vn parsing
+
+                        // Code
+
+                        //-------------------------------------------------------
                     }
                     line.startsWith("vt ") -> {
-                        val vTexture = line.split(" ")
-                        val x = vTexture[1].toFloat()
-                        val y = vTexture[2].toFloat()
-                        texCoord.add(x)
-                        texCoord.add(y)
+                        //-------------------------------------------------------
+                        // Problem 1
+                        // Implement .obj loader, parsing vertex (v), texture (vt), and normal (n)
+                        // vt parsing
+
+                        // Code
+
+                        //-------------------------------------------------------
                     }
                     line.startsWith("f ") -> {
-                        val face = line.split(" ")
-                        val faceX = face[1].split("/")
-                        val faceY = face[2].split("/")
-                        val faceZ = face[3].split("/")
-                        indices.add(faceX[0].toInt())
-                        indices.add(faceX[1].toInt())
-                        indices.add(faceX[2].toInt())
-                        indices.add(faceY[0].toInt())
-                        indices.add(faceY[1].toInt())
-                        indices.add(faceY[2].toInt())
-                        indices.add(faceZ[0].toInt())
-                        indices.add(faceZ[1].toInt())
-                        indices.add(faceZ[2].toInt())
+                        //-------------------------------------------------------
+                        // Problem 1
+                        // Implement .obj loader, parsing vertex (v), texture (vt), and normal (n)
+                        // v parsing
+
+                        // Code
+
+                        //-------------------------------------------------------
                     }
                 }
             }
@@ -264,6 +260,7 @@ class Obj(context: Context, filename: String, program: Int, private var material
             //   We already implemented the buffer part using "triangleVertices".
             //   Implement the rest of the code using "triangleVertices".
 
+<<<<<<< HEAD
             for(i in 0 until (indices.size/3 - 1)){
                 triangleVertices.add((vertices[indices[i]] - 1) * 3)
                 triangleVertices.add((vertices[indices[i]] - 1) * 3 + 1)
@@ -275,6 +272,10 @@ class Obj(context: Context, filename: String, program: Int, private var material
                 triangleVertices.add((texCoord[indices[i + 2]] - 1) * 3 + 2)
             }
             print(triangleVertices.size)
+=======
+            // Code
+
+>>>>>>> parent of f16f5db (save)
             //-------------------------------------------------------
             verticesBuffer = ByteBuffer.allocateDirect(triangleVertices.size * 4).run {
                 order(ByteOrder.nativeOrder())

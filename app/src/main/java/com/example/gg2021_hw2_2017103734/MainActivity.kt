@@ -67,8 +67,8 @@ class MyGLRenderer(context: Context): GLSurfaceView.Renderer{
     private var eyePos = floatArrayOf(1.5f, 3.5f, 5f)
     private lateinit var teapot: Obj
     private lateinit var teapotMaterial: Material
-    private val lightL: Light = Light(direction = 'L')
-    private val lightR: Light = Light(direction = 'R')
+    //private val lightL: Light = Light(direction = 'L')
+    //private val lightR: Light = Light(direction = 'R')
 
     override fun onSurfaceCreated(p0: GL10?, p1: EGLConfig?) {
         val vertexShader: Int = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode)
@@ -98,12 +98,12 @@ class MyGLRenderer(context: Context): GLSurfaceView.Renderer{
 
         //-------------------------------------------------------
 
-        lightL.program = mProgram
-        lightR.program = mProgram
-        lightL.position = floatArrayOf(-5f, 0f, 5f)
-        lightL.diffuse = floatArrayOf(0.6f, 0.1f, 0.2f)
-        lightR.position = floatArrayOf(5f, 2f, 5f)
-        lightR.diffuse = floatArrayOf(0.2f, 0.7f, 0.9f)
+        //lightL.program = mProgram
+        //lightR.program = mProgram
+        //lightL.position = floatArrayOf(-5f, 0f, 5f)
+        //lightL.diffuse = floatArrayOf(0.6f, 0.1f, 0.2f)
+        //lightR.position = floatArrayOf(5f, 2f, 5f)
+        //lightR.diffuse = floatArrayOf(0.2f, 0.7f, 0.9f)
     }
 
     override fun onDrawFrame(p0: GL10?) {
@@ -118,8 +118,8 @@ class MyGLRenderer(context: Context): GLSurfaceView.Renderer{
         val eyePosHandle = GLES20.glGetUniformLocation(mProgram, "eyePos")
         GLES20.glUniform3fv(eyePosHandle, 1, eyePos, 0)
 
-        lightL.update()
-        lightR.update()
+        //lightL.update()
+        //lightR.update()
 
         teapot.draw(teapotModelMatrix, vPMatrix)
 
@@ -274,7 +274,7 @@ class Obj(context: Context, filename: String, program: Int, private var material
                 triangleVertices.add((texCoord[indices[i + 2]] - 1) * 3 + 1)
                 triangleVertices.add((texCoord[indices[i + 2]] - 1) * 3 + 2)
             }
-
+            print(triangleVertices.size)
             //-------------------------------------------------------
             verticesBuffer = ByteBuffer.allocateDirect(triangleVertices.size * 4).run {
                 order(ByteOrder.nativeOrder())

@@ -67,8 +67,8 @@ class MyGLRenderer(context: Context): GLSurfaceView.Renderer{
     private var eyePos = floatArrayOf(1.5f, 3.5f, 5f)
     private lateinit var teapot: Obj
     private lateinit var teapotMaterial: Material
-    //private val lightL: Light = Light(direction = 'L')
-    //private val lightR: Light = Light(direction = 'R')
+    private val lightL: Light = Light(direction = 'L')
+    private val lightR: Light = Light(direction = 'R')
 
     override fun onSurfaceCreated(p0: GL10?, p1: EGLConfig?) {
         val vertexShader: Int = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode)
@@ -90,25 +90,23 @@ class MyGLRenderer(context: Context): GLSurfaceView.Renderer{
         //   The number parameter of the Texture object must be incremented by 1 from 0
         //   for each texture construction.\
         // Also, change the teapot Obj construction code below to get the texture parameters.
-
-        // val teapotTexture =
-        // val dissolveTexture =
-        // teapotMaterial =
-        teapot = Obj(mContext, "teapot.obj", mProgram)
+        val teapotTexture = Texture(mContext, 0, R.drawable.flower, "textureDiff")
+        val dissolveTexture = Texture(mContext, 1, R.drawable.dissolve, "textureDissolve")
+        teapotMaterial = Material(teapotTexture, dissolveTexture)
+        teapot = Obj(mContext, "teapot.obj", mProgram, teapotMaterial)
 
         //-------------------------------------------------------
 
-        //lightL.program = mProgram
-        //lightR.program = mProgram
-        //lightL.position = floatArrayOf(-5f, 0f, 5f)
-        //lightL.diffuse = floatArrayOf(0.6f, 0.1f, 0.2f)
-        //lightR.position = floatArrayOf(5f, 2f, 5f)
-        //lightR.diffuse = floatArrayOf(0.2f, 0.7f, 0.9f)
+        lightL.program = mProgram
+        lightR.program = mProgram
+        lightL.position = floatArrayOf(-5f, 0f, 5f)
+        lightL.diffuse = floatArrayOf(0.6f, 0.1f, 0.2f)
+        lightR.position = floatArrayOf(5f, 2f, 5f)
+        lightR.diffuse = floatArrayOf(0.2f, 0.7f, 0.9f)
     }
 
     override fun onDrawFrame(p0: GL10?) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
-
         viewMatrix = mySetLookAtM(eyePos[0], eyePos[1], eyePos[2], 0f, 0f, 0f, 0f, 1.0f, 0.0f)
 
         Matrix.multiplyMM(vPMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
@@ -118,8 +116,9 @@ class MyGLRenderer(context: Context): GLSurfaceView.Renderer{
         val eyePosHandle = GLES20.glGetUniformLocation(mProgram, "eyePos")
         GLES20.glUniform3fv(eyePosHandle, 1, eyePos, 0)
 
-        //lightL.update()
-        //lightR.update()
+        lightL.update()
+        lightR.update()
+
 
         teapot.draw(teapotModelMatrix, vPMatrix)
 
@@ -130,8 +129,8 @@ class MyGLRenderer(context: Context): GLSurfaceView.Renderer{
         // % Note
         //   You should first construct a dissolve Texture object and put
         //   it into the teapot material first.
-
         // Code
+        teapotMaterial.threshold += 0.001f
 
         //-------------------------------------------------------
     }
@@ -195,6 +194,9 @@ fun myFrustumM(aspect:Float, fov:Float, near:Float, far:Float):FloatArray{
 class Obj(context: Context, filename: String, program: Int, private var material: Material? = null){
 
     private var vertices = mutableListOf<Float>()
+    private var normals = mutableListOf<Float>()
+    private var texCoord = mutableListOf<Float>()
+    private var indices = mutableListOf<Int>()
     private var triangleVertices = mutableListOf<Float>()
     private lateinit var verticesBuffer: FloatBuffer
 
@@ -217,34 +219,35 @@ class Obj(context: Context, filename: String, program: Int, private var material
                         vertices.add(z)
                     }
                     line.startsWith("vn ") -> {
-                        //-------------------------------------------------------
-                        // Problem 1
-                        // Implement .obj loader, parsing vertex (v), texture (vt), and normal (n).
-                        // vn parsing
-
-                        // Code
-
-                        //-------------------------------------------------------
+                        val vNormal = line.split(" ")
+                        val x = vNormal[1].toFloat()
+                        val y = vNormal[2].toFloat()
+                        val z = vNormal[3].toFloat()
+                        normals.add(x)
+                        normals.add(y)
+                        normals.add(z)
                     }
                     line.startsWith("vt ") -> {
-                        //-------------------------------------------------------
-                        // Problem 1
-                        // Implement .obj loader, parsing vertex (v), texture (vt), and normal (n)
-                        // vt parsing
-
-                        // Code
-
-                        //-------------------------------------------------------
+                        val vTexture = line.split(" ")
+                        val x = vTexture[1].toFloat()
+                        val y = vTexture[2].toFloat()
+                        texCoord.add(x)
+                        texCoord.add(y)
                     }
                     line.startsWith("f ") -> {
-                        //-------------------------------------------------------
-                        // Problem 1
-                        // Implement .obj loader, parsing vertex (v), texture (vt), and normal (n)
-                        // v parsing
-
-                        // Code
-
-                        //-------------------------------------------------------
+                        val face = line.split(" ")
+                        val faceX = face[1].split("/")
+                        val faceY = face[2].split("/")
+                        val faceZ = face[3].split("/")
+                        indices.add(faceX[0].toInt())
+                        indices.add(faceX[1].toInt())
+                        indices.add(faceX[2].toInt())
+                        indices.add(faceY[0].toInt())
+                        indices.add(faceY[1].toInt())
+                        indices.add(faceY[2].toInt())
+                        indices.add(faceZ[0].toInt())
+                        indices.add(faceZ[1].toInt())
+                        indices.add(faceZ[2].toInt())
                     }
                 }
             }
@@ -260,22 +263,16 @@ class Obj(context: Context, filename: String, program: Int, private var material
             //   We already implemented the buffer part using "triangleVertices".
             //   Implement the rest of the code using "triangleVertices".
 
-<<<<<<< HEAD
-            for(i in 0 until (indices.size/3 - 1)){
-                triangleVertices.add((vertices[indices[i]] - 1) * 3)
-                triangleVertices.add((vertices[indices[i]] - 1) * 3 + 1)
-                triangleVertices.add((vertices[indices[i]] - 1) * 3 + 2)
-                triangleVertices.add((normals[indices[i + 1]] - 1) * 2)
-                triangleVertices.add((normals[indices[i + 1]] - 1) * 2 + 1)
-                triangleVertices.add((texCoord[indices[i + 2]] - 1) * 3)
-                triangleVertices.add((texCoord[indices[i + 2]] - 1) * 3 + 1)
-                triangleVertices.add((texCoord[indices[i + 2]] - 1) * 3 + 2)
+            for(i in 0 until (indices.size/3)){
+                triangleVertices.add(vertices[(indices[i * 3] - 1) * 3])
+                triangleVertices.add(vertices[(indices[i * 3] - 1) * 3 + 1])
+                triangleVertices.add(vertices[(indices[i * 3] - 1) * 3 + 2])
+                triangleVertices.add(normals[(indices[i * 3 + 2] - 1) * 3])
+                triangleVertices.add(normals[(indices[i * 3 + 2] - 1) * 3 + 1])
+                triangleVertices.add(normals[(indices[i * 3 + 2] - 1) * 3 + 2])
+                triangleVertices.add(texCoord[(indices[i * 3 + 1] - 1) * 2])
+                triangleVertices.add(texCoord[(indices[i * 3 + 1] - 1) * 2 + 1])
             }
-            print(triangleVertices.size)
-=======
-            // Code
-
->>>>>>> parent of f16f5db (save)
             //-------------------------------------------------------
             verticesBuffer = ByteBuffer.allocateDirect(triangleVertices.size * 4).run {
                 order(ByteOrder.nativeOrder())

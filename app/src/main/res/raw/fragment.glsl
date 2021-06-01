@@ -20,7 +20,7 @@ void main() {
     // Put a texture on the teapot.
     // Change the code below to get the texture value.
 
-    vec3 color = vec3(1.0, 1.0, 1.0);
+    vec3 color = texture2D(textureDiff, v_texCoord).rgb;
 
     //-------------------------------------------------------
 
@@ -29,25 +29,23 @@ void main() {
     // Implement the phong shader using 2 color point lights.
 
     // diffuse term
-    // vec3 matDiff = ;
-    // vec3 diffL = ;
-    // vec3 diffR = ;
-    // vec3 diff = ;
+    vec3 matDiff = color;
+    vec3 diffL = max(dot(v_lightL, v_normal), 0.0) * srcDiffL * matDiff * v_attL;
+    vec3 diffR = max(dot(v_lightR, v_normal), 0.0) * srcDiffR * matDiff * v_attR;
+    vec3 diff = diffL + diffR;
 
     // specular term
-    // vec3 reflL = ;
-    // vec3 reflR = ;
-    // vec3 specL = ;
-    // vec3 specR = ;
-    // vec3 spec = ;
+    vec3 reflL = reflect(-v_lightL, v_normal);
+    vec3 reflR = reflect(-v_lightR, v_normal);
+    vec3 specL = pow(max(dot(reflL, v_view), 0.0), matSh) * srcSpecL * matSpec * v_attL;
+    vec3 specR = pow(max(dot(reflR, v_view), 0.0), matSh) * srcSpecR * matSpec * v_attR;
+    vec3 spec = specL + specR;
 
     // ambient term
-    // vec3 ambiL = ;
-    // vec3 ambiR = ;
-    // vec3 ambi = ;
-
-    // color = ;
-
+    vec3 ambiL = matAmbi * srcAmbiL;
+    vec3 ambiR = matAmbi * srcAmbiR;
+    vec3 ambi = ambiL + ambiR;
+    color = ambi + diff + spec + matEmit;
     //-------------------------------------------------------
 
     float alpha = 1.0;
@@ -55,9 +53,21 @@ void main() {
     // Problem 4
     // Implement the alpha blending using an extra dissolve texture.
 
+    alpha = alpha - threshold;
 
+    if(alpha < 0.0){
+        alpha = 0.0;
+    }
+    color = color * alpha;
+    vec3 diss = texture2D(textureDissolve, v_texCoord).rgb * (1.0 - alpha);
+    vec3 result = color + diss;
     //-------------------------------------------------------
 
+    if(diss.x < (1.5 * (1.0 - alpha) - 0.3) ){
+        discard;
+    }
+
     // final output color with alpha
-    gl_FragColor = vec4(color, alpha);
+    //gl_FragColor = vec4(color, 1.0);
+    gl_FragColor = vec4(result,1.0);
 }

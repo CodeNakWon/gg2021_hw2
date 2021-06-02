@@ -130,7 +130,7 @@ class MyGLRenderer(context: Context): GLSurfaceView.Renderer{
         //   You should first construct a dissolve Texture object and put
         //   it into the teapot material first.
         // Code
-        teapotMaterial.threshold += 0.001f
+        teapotMaterial.threshold += 0.002f
 
         //-------------------------------------------------------
     }

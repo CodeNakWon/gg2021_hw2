@@ -53,21 +53,17 @@ void main() {
     // Problem 4
     // Implement the alpha blending using an extra dissolve texture.
 
-    alpha = alpha - threshold;
-
-    if(alpha < 0.0){
-        alpha = 0.0;
-    }
-    color = color * alpha;
-    vec3 diss = texture2D(textureDissolve, v_texCoord).rgb * (1.0 - alpha);
-    vec3 result = color + diss;
+    alpha = 1.0 - threshold;
+    //vec3 layer1 = texture2D(textureDiff, v_texCoord).rgb * alpha;
+    vec3 layer1 = color * alpha + texture2D(textureDissolve, v_texCoord).rgb * (1.0 - alpha);
+    vec3 layer2 = vec4(layer1
     //-------------------------------------------------------
-
+    /*
     if(diss.x < (1.5 * (1.0 - alpha) - 0.3) ){
         discard;
     }
-
+    */
     // final output color with alpha
     //gl_FragColor = vec4(color, 1.0);
-    gl_FragColor = vec4(result,1.0);
+    gl_FragColor = vec4(layer2,1.0);
 }
